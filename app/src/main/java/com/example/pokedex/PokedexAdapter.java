@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -28,12 +30,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexViewHolder> {
+public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexViewHolder> implements Filterable {
     public static class PokedexViewHolder extends RecyclerView.ViewHolder {
         private LinearLayout containerView;
         private TextView textView;
         PokedexViewHolder(View view){
             super(view);
+
             containerView = view.findViewById(R.id.pokedex_row);
             textView = view.findViewById(R.id.pokedex_row_text_view);
 
@@ -52,6 +55,9 @@ public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexV
 
     private List<Pokemon> pokemon = new ArrayList<>();
     private RequestQueue requestQueue;
+    private List<Pokemon> filtered = new ArrayList<>();
+
+    private List<Pokemon> test = pokemon;
 
     PokedexAdapter(Context context){
         requestQueue = Volley.newRequestQueue(context);
@@ -70,6 +76,7 @@ public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexV
                         String name = result.getString("name");
                         pokemon.add(new Pokemon(name.substring(0,1).toUpperCase() + name.substring(1), result.getString("url")));
                     }
+                    filtered.addAll(pokemon);
                     notifyDataSetChanged();
                 } catch (JSONException e) {
                     Log.e("cs50", "Json error", e);
@@ -93,13 +100,42 @@ public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexV
 
     @Override
     public void onBindViewHolder(@NonNull PokedexViewHolder holder, int position) {
-        Pokemon current = pokemon.get(position);
+        Pokemon current = filtered.get(position);
         holder.textView.setText(current.getName());
         holder.containerView.setTag(current);
     }
 
     @Override
     public int getItemCount() {
-        return pokemon.size();
+        return filtered.size();
+    }
+
+    private class PokemonFilter extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Pokemon> filteredPokemon = new ArrayList<>();
+            for (Pokemon onePokemon: pokemon){
+                String constraintString = constraint.toString();
+                if (onePokemon.getName().startsWith(constraintString)){
+                    filteredPokemon.add(onePokemon);
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredPokemon;
+            results.count = filteredPokemon.size();
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            filtered = (List<Pokemon>) results.values;
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new PokemonFilter();
     }
 }
