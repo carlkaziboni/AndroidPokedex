@@ -53,15 +53,22 @@ public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexV
         }
     }
 
-    private List<Pokemon> pokemon = new ArrayList<>();
+    private static List<Pokemon> pokemon = new ArrayList<>();
     private RequestQueue requestQueue;
     private List<Pokemon> filtered = new ArrayList<>();
-
-    private List<Pokemon> test = pokemon;
 
     PokedexAdapter(Context context){
         requestQueue = Volley.newRequestQueue(context);
         loadPokemon();
+    }
+
+    public static Pokemon getPokemon(String specifiedPokemon){
+        for (Pokemon onePokemon: pokemon){
+            if (onePokemon.getName().equalsIgnoreCase(specifiedPokemon)){
+                return onePokemon;
+            }
+        }
+        return null;
     }
 
     public void loadPokemon(){

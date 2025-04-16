@@ -1,7 +1,11 @@
 package com.example.pokedex;
 
+import static com.example.pokedex.PokedexAdapter.getPokemon;
+
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -29,6 +33,7 @@ public class PokemonActivity extends AppCompatActivity {
     private TextView type2TextView;
     private String url;
     private RequestQueue requestQueue;
+    private Button catchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +47,7 @@ public class PokemonActivity extends AppCompatActivity {
         numberTextView = findViewById(R.id.pokemon_number);
         type1TextView = findViewById(R.id.pokemon_type1);
         type2TextView = findViewById(R.id.pokemon_type2);
+        catchButton = findViewById(R.id.toggle_catch);
         load();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -49,6 +55,7 @@ public class PokemonActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
     }
 
     public void load(){
@@ -59,7 +66,13 @@ public class PokemonActivity extends AppCompatActivity {
             public void onResponse(JSONObject response) {
                 try {
                     nameTextView.setText(response.getString("name"));
-                    numberTextView.setText(String.format("#03d", response.getInt("id")));
+                    Pokemon pokemon = getPokemon(response.getString("name"));
+                    if (pokemon.isCaught()){
+                        catchButton.setText("Release");
+                    } else {
+                        catchButton.setText("Catch");
+                    }
+                    numberTextView.setText(String.format("#%03d", response.getInt("id")));
 
                     JSONArray entries = response.getJSONArray("types");
                     for (int i = 0; i < entries.length(); i++) {
@@ -85,5 +98,16 @@ public class PokemonActivity extends AppCompatActivity {
             }
         });
         requestQueue.add(request);
+    }
+
+    public void toggleCatch(View view) {
+        TextView pokemonName = findViewById(R.id.pokemon_name);
+        Pokemon pokemon = getPokemon(pokemonName.getText().toString());
+        pokemon.setCaught(!pokemon.isCaught());
+        if (pokemon.isCaught()) {
+            catchButton.setText("Release");
+        } else {
+            catchButton.setText("Catch");
+        }
     }
 }
