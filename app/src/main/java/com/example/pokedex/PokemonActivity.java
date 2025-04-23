@@ -2,6 +2,8 @@ package com.example.pokedex;
 
 import static com.example.pokedex.PokedexAdapter.getPokemon;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -67,6 +69,9 @@ public class PokemonActivity extends AppCompatActivity {
                 try {
                     nameTextView.setText(response.getString("name"));
                     Pokemon pokemon = getPokemon(response.getString("name"));
+                    SharedPreferences sharedPreferences = getSharedPreferences("Pokemon", Context.MODE_PRIVATE);
+                    boolean caught = sharedPreferences.getBoolean(nameTextView.getText().toString(), false);
+                    pokemon.setCaught(caught);
                     if (pokemon.isCaught()){
                         catchButton.setText("Release");
                     } else {
@@ -101,12 +106,20 @@ public class PokemonActivity extends AppCompatActivity {
     }
 
     public void toggleCatch(View view) {
+        Context context = getApplicationContext();
+        SharedPreferences sharedPreferences = context.getSharedPreferences("Pokemon", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        boolean caught = sharedPreferences.getBoolean(nameTextView.getText().toString(), false);
         TextView pokemonName = findViewById(R.id.pokemon_name);
         Pokemon pokemon = getPokemon(pokemonName.getText().toString());
-        pokemon.setCaught(!pokemon.isCaught());
-        if (pokemon.isCaught()) {
+        pokemon.setCaught(caught);
+        if (!caught) {
+            editor.putBoolean(nameTextView.getText().toString(), true);
+            editor.apply();
             catchButton.setText("Release");
         } else {
+            editor.putBoolean(nameTextView.getText().toString(), false);
+            editor.apply();
             catchButton.setText("Catch");
         }
     }
