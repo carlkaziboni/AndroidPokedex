@@ -48,4 +48,9 @@
         android:id="@+id/toggle_catch"
         android:onClick="toggleCatch" />
 
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:id="@+id/pokemon_image" />
+
 </LinearLayout>

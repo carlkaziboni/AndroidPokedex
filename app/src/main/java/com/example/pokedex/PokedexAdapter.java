@@ -123,8 +123,8 @@ public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexV
         protected FilterResults performFiltering(CharSequence constraint) {
             List<Pokemon> filteredPokemon = new ArrayList<>();
             for (Pokemon onePokemon: pokemon){
-                String constraintString = constraint.toString();
-                if (onePokemon.getName().startsWith(constraintString)){
+                String constraintString = constraint.toString().toLowerCase();
+                if (onePokemon.getName().toLowerCase().startsWith(constraintString)){
                     filteredPokemon.add(onePokemon);
                 }
             }
