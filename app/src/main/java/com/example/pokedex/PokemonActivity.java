@@ -25,6 +25,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -41,6 +42,7 @@ public class PokemonActivity extends AppCompatActivity {
     private TextView type1TextView;
     private TextView type2TextView;
     private ImageView imageView;
+    private TextView descriptionTextView;
     private String url;
     private RequestQueue requestQueue;
     private Button catchButton;
@@ -60,6 +62,7 @@ public class PokemonActivity extends AppCompatActivity {
         type2TextView = findViewById(R.id.pokemon_type2);
         catchButton = findViewById(R.id.toggle_catch);
         imageView = findViewById(R.id.pokemon_image);
+        descriptionTextView = findViewById(R.id.pokemon_description);
         load();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -91,6 +94,7 @@ public class PokemonActivity extends AppCompatActivity {
                         catchButton.setText("Catch");
                     }
                     numberTextView.setText(String.format("#%03d", response.getInt("id")));
+                    loadDescription(response.getInt("id"), descriptionTextView);
 
                     JSONArray entries = response.getJSONArray("types");
                     for (int i = 0; i < entries.length(); i++) {
@@ -113,6 +117,27 @@ public class PokemonActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e("cs50", "Pokemon details error");
+            }
+        });
+        requestQueue.add(request);
+    }
+
+    public void loadDescription(int species, TextView textView){
+        String url = "https://pokeapi.co/api/v2/pokemon-species/" + species;
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    String description = (response.getJSONArray("flavor_text_entries").getJSONObject(0).getString("flavor_text"));
+                    textView.setText(description);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("cs50", "Pokemon description error");
             }
         });
         requestQueue.add(request);

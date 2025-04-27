@@ -53,4 +53,12 @@
         android:layout_height="150dp"
         android:id="@+id/pokemon_image" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/pokemon_description"
+        android:textAlignment="center"
+        android:textSize="16dp"
+        android:paddingTop="5dp"/>
+
 </LinearLayout>
